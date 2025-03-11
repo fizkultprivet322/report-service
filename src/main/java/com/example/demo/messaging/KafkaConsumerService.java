@@ -1,9 +1,9 @@
 package com.example.demo.messaging;
 
 import com.example.demo.entity.ReportRequest;
-import com.example.demo.entity.ReportResult;
 import com.example.demo.repository.ReportRequestRepository;
 import com.example.demo.repository.ReportResultRepository;
+import com.example.demo.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -18,7 +18,7 @@ import java.util.UUID;
 public class KafkaConsumerService {
 
     private final ReportRequestRepository requestRepository;
-    private final ReportResultRepository resultRepository;
+    private final ReportService reportService;
 
     @KafkaListener(topics = "report_requests", groupId = "report-group")
     public void consume(String message) {
@@ -33,13 +33,8 @@ public class KafkaConsumerService {
         if (reportRequestOptional.isPresent()) {
             ReportRequest reportRequest = reportRequestOptional.get();
 
-            // Создайте и сохраните результат отчета
-            ReportResult reportResult = new ReportResult();
-            reportResult.setRequestId(reportRequest.getId()); // Убедитесь, что requestId установлен правильно
-            reportResult.setConversionRatio(0.0); // Пример значения
-            reportResult.setPaymentCount(0); // Пример значения
-
-            resultRepository.save(reportResult);
+            // Рассчитайте и сохраните результат отчета
+            reportService.calculateAndSaveReportResult(reportId);
 
             log.info("Создан и сохранен результат отчета для запроса с ID: {}", reportRequest.getId());
         } else {
