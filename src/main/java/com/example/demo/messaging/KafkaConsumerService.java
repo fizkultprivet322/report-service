@@ -2,7 +2,6 @@ package com.example.demo.messaging;
 
 import com.example.demo.entity.ReportRequest;
 import com.example.demo.repository.ReportRequestRepository;
-import com.example.demo.repository.ReportResultRepository;
 import com.example.demo.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,16 +23,13 @@ public class KafkaConsumerService {
     public void consume(String message) {
         log.info("Получено сообщение: {}", message);
 
-        // Извлеките ID отчета из сообщения
         UUID reportId = UUID.fromString(message.split(": ")[1]);
 
-        // Найдите запрос отчета в базе данных
         Optional<ReportRequest> reportRequestOptional = requestRepository.findById(reportId);
 
         if (reportRequestOptional.isPresent()) {
             ReportRequest reportRequest = reportRequestOptional.get();
 
-            // Рассчитайте и сохраните результат отчета
             reportService.calculateAndSaveReportResult(reportId);
 
             log.info("Создан и сохранен результат отчета для запроса с ID: {}", reportRequest.getId());
