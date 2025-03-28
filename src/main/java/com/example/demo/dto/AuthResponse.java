@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
@@ -19,6 +20,7 @@ import lombok.Data;
  * @see Data
  */
 @Data
+@Schema(description = "Authentication response containing JWT token")
 public class AuthResponse {
     /**
      * The JWT token string generated after successful authentication.
@@ -33,6 +35,10 @@ public class AuthResponse {
      * <p>Should be included in requests as:
      * <pre>Authorization: Bearer {token}</pre>
      */
+    @Schema(
+            description = "JWT token",
+            example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private final String token;
 
     /**

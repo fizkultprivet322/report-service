@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
@@ -16,12 +17,17 @@ import lombok.Data;
  * @see Data
  */
 @Data
+@Schema(description = "Authentication request")
 public class AuthRequest {
     /**
      * The username credential for authentication.
      * <p>
      * Typically matches the unique username stored in the system.
      */
+    @Schema(
+            description = "Username",
+            example = "user",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private String username;
 
     /**
@@ -31,5 +37,9 @@ public class AuthRequest {
      * <p>
      * Note: In production, passwords should always be transmitted over secure channels (HTTPS).
      */
+    @Schema(
+            description = "Password",
+            example = "password",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private String password;
 }
