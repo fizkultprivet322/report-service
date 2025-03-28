@@ -20,6 +20,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+/**
+ * Test class for {@link AnalyticsService}.
+ * <p>
+ * This class contains unit tests that verify the behavior of AnalyticsService methods
+ * using Mockito for mocking dependencies. Tests focus on the service's ability to:
+ * <ul>
+ *   <li>Retrieve view analytics data</li>
+ *   <li>Fetch payment transaction data</li>
+ *   <li>Handle time-bound queries correctly</li>
+ * </ul>
+ *
+ * <p>Test cases validate both successful scenarios and proper data handling.
+ *
+ * @see ExtendWith
+ * @see Mock
+ * @see InjectMocks
+ * @see Test
+ */
 @ExtendWith(MockitoExtension.class)
 public class AnalyticsServiceTests {
 
@@ -35,12 +53,31 @@ public class AnalyticsServiceTests {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
+    /**
+     * Sets up test data before each test execution.
+     * <p>
+     * Initializes common test data:
+     * <ul>
+     *   <li>startDate - current date/time</li>
+     *   <li>endDate - 1 day after startDate</li>
+     * </ul>
+     */
     @BeforeEach
     void setUp() {
         startDate = LocalDateTime.now();
         endDate = startDate.plusDays(1);
     }
 
+    /**
+     * Tests successful retrieval of view analytics data.
+     * <p>
+     * Verifies that:
+     * <ul>
+     *   <li>Service properly delegates to ViewRepository</li>
+     *   <li>Returned list contains expected view data</li>
+     *   <li>Data matches the requested criteria</li>
+     * </ul>
+     */
     @Test
     void getViews_ShouldReturnViews() {
         View view = new View();
@@ -57,6 +94,16 @@ public class AnalyticsServiceTests {
         assertEquals(view, views.get(0));
     }
 
+    /**
+     * Tests successful retrieval of payment transaction data.
+     * <p>
+     * Verifies that:
+     * <ul>
+     *   <li>Service properly delegates to PaymentRepository</li>
+     *   <li>Returned list contains expected payment data</li>
+     *   <li>Data matches the requested criteria</li>
+     * </ul>
+     */
     @Test
     void getPayments_ShouldReturnPayments() {
         Payment payment = new Payment();

@@ -20,10 +20,34 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Test class for {@link ReportController}.
+ * <p>
+ * Contains MockMvc-based tests that verify the REST API endpoints
+ * for report generation and retrieval. Tests cover both successful
+ * scenarios and error cases.
+ *
+ * <p>Tested endpoints:
+ * <ul>
+ *   <li>POST /api/reports - Report creation</li>
+ *   <li>GET /api/reports/{id} - Report retrieval</li>
+ * </ul>
+ *
+ * <p>Test scenarios:
+ * <ul>
+ *   <li>Successful report creation</li>
+ *   <li>Successful report retrieval</li>
+ *   <li>Report not found case</li>
+ * </ul>
+ *
+ * @see ExtendWith
+ * @see Mock
+ * @see InjectMocks
+ * @see Test
+ */
 @ExtendWith(MockitoExtension.class)
 public class ReportControllerTests {
 
@@ -36,12 +60,34 @@ public class ReportControllerTests {
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
+    /**
+     * Initializes test environment before each test.
+     * <p>
+     * Sets up:
+     * <ul>
+     *   <li>MockMvc instance for controller testing</li>
+     *   <li>ObjectMapper for JSON serialization/deserialization</li>
+     * </ul>
+     */
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(reportController).build();
         objectMapper = new ObjectMapper();
     }
 
+    /**
+     * Tests successful report creation via POST /api/reports.
+     * <p>
+     * Verifies:
+     * <ul>
+     *   <li>HTTP 200 status code</li>
+     *   <li>Correct response body format</li>
+     *   <li>Proper service method invocation</li>
+     *   <li>JSON request/response handling</li>
+     * </ul>
+     *
+     * @throws Exception if mockMvc.perform fails
+     */
     @Test
     void createReport_ShouldReturnReportId() throws Exception {
         UUID reportId = UUID.randomUUID();
@@ -58,6 +104,19 @@ public class ReportControllerTests {
                 .andExpect(content().string("Report ID: " + reportId));
     }
 
+    /**
+     * Tests successful report retrieval via GET /api/reports/{id}.
+     * <p>
+     * Verifies:
+     * <ul>
+     *   <li>HTTP 200 status code</li>
+     *   <li>Correct JSON response structure</li>
+     *   <li>All expected report fields</li>
+     *   <li>Proper service method invocation</li>
+     * </ul>
+     *
+     * @throws Exception if mockMvc.perform fails
+     */
     @Test
     void getReport_ShouldReturnReport() throws Exception {
         UUID reportId = UUID.randomUUID();
@@ -75,6 +134,18 @@ public class ReportControllerTests {
                 .andExpect(jsonPath("$.paymentCount").value(10));
     }
 
+    /**
+     * Tests report not found scenario via GET /api/reports/{id}.
+     * <p>
+     * Verifies:
+     * <ul>
+     *   <li>HTTP 404 status code</li>
+     *   <li>Proper handling of missing reports</li>
+     *   <li>Empty Optional handling from service</li>
+     * </ul>
+     *
+     * @throws Exception if mockMvc.perform fails
+     */
     @Test
     void getReport_ShouldReturnNotFound() throws Exception {
         UUID reportId = UUID.randomUUID();

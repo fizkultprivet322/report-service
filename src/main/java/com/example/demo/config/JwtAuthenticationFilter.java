@@ -16,16 +16,51 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * A Spring Security filter that processes JWT authentication for each incoming request.
+ * This filter intercepts requests, extracts JWT tokens from the Authorization header,
+ * validates them, and sets up the Spring Security context if the token is valid.
+ *
+ * <p>Extends {@link OncePerRequestFilter} to ensure a single execution per request.
+ *
+ * @see OncePerRequestFilter
+ * @see JwtUtils
+ * @see UserRepository
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
 
+    /**
+     * Constructs a new JwtAuthenticationFilter with the required dependencies.
+     *
+     * @param jwtUtils Utility class for JWT operations
+     * @param userRepository Repository for user data access
+     */
     public JwtAuthenticationFilter(JwtUtils jwtUtils, UserRepository userRepository) {
         this.jwtUtils = jwtUtils;
         this.userRepository = userRepository;
     }
 
+    /**
+     * Processes each incoming request to check for JWT authentication.
+     *
+     * <p>This method:
+     * <ol>
+     *   <li>Extracts the JWT token from the Authorization header if present</li>
+     *   <li>Validates the token and extracts the username</li>
+     *   <li>Loads user details from the repository if token is valid</li>
+     *   <li>Sets up Spring Security authentication in the context if validation succeeds</li>
+     * </ol>
+     *
+     * @param request The incoming HTTP request
+     * @param response The HTTP response
+     * @param filterChain The filter chain to continue processing
+     * @throws ServletException if a servlet-related error occurs
+     * @throws IOException if an I/O error occurs
+     * @throws UsernameNotFoundException if the user from the token isn't found in the repository
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
