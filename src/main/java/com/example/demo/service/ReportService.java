@@ -43,14 +43,11 @@ public class ReportService {
         LocalDateTime startDate = reportRequest.getStartDate();
         LocalDateTime endDate = reportRequest.getEndDate();
 
-        // Получаем данные о просмотрах и оплатах
         int viewCount = analyticsService.getViews(productId, layoutId, startDate, endDate).size();
         int paymentCount = analyticsService.getPayments(productId, layoutId, startDate, endDate).size();
 
-        // Рассчитываем конверсию
         double conversionRatio = (viewCount == 0) ? 0 : (double) paymentCount / viewCount;
 
-        // Сохраняем результат
         ReportResult reportResult = new ReportResult();
         reportResult.setRequestId(reportId);
         reportResult.setConversionRatio(conversionRatio);
@@ -58,7 +55,6 @@ public class ReportService {
 
         resultRepository.save(reportResult);
 
-        // Обновляем статус запроса отчета
         reportRequest.setStatus(ReportStatus.COMPLETED);
         requestRepository.save(reportRequest);
     }
