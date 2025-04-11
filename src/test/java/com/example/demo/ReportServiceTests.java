@@ -1,8 +1,10 @@
 package com.example.demo;
 
+import com.example.demo.dto.ReportRequestDto;
 import com.example.demo.entity.ReportRequest;
 import com.example.demo.entity.ReportResult;
 import com.example.demo.entity.ReportStatus;
+import com.example.demo.mapper.ReportMapper;
 import com.example.demo.messaging.KafkaProducerService;
 import com.example.demo.repository.ReportRequestRepository;
 import com.example.demo.repository.ReportResultRepository;
@@ -22,27 +24,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-/**
- * Test class for {@link ReportService}.
- * <p>
- * Contains unit tests that verify the business logic and behavior
- * of the report service, including report creation, retrieval,
- * and calculation processes.
- *
- * <p>Test scenarios:
- * <ul>
- *   <li>Report request creation and Kafka message sending</li>
- *   <li>Report result retrieval</li>
- *   <li>Report calculation and status update</li>
- * </ul>
- *
- * @see ExtendWith
- * @see Mock
- * @see InjectMocks
- * @see Test
- */
 @ExtendWith(MockitoExtension.class)
 public class ReportServiceTests {
 
@@ -58,65 +42,45 @@ public class ReportServiceTests {
     @Mock
     private AnalyticsService analyticsService;
 
+    @Mock
+    private ReportMapper reportMapper;
+
     @InjectMocks
     private ReportService reportService;
 
+    private ReportRequestDto reportRequestDto;
     private ReportRequest reportRequest;
 
-    /**
-     * Initializes test data before each test execution.
-     * <p>
-     * Creates a sample report request with:
-     * <ul>
-     *   <li>Random UUID</li>
-     *   <li>Sample product and layout IDs</li>
-     *   <li>Current date as start date</li>
-     *   <li>Next day as end date</li>
-     *   <li>PENDING status</li>
-     * </ul>
-     */
     @BeforeEach
     void setUp() {
+        reportRequestDto = new ReportRequestDto();
+        reportRequestDto.setProductId("product1");
+        reportRequestDto.setLayoutId("layout1");
+        reportRequestDto.setStartDate(LocalDateTime.now());
+        reportRequestDto.setEndDate(LocalDateTime.now().plusDays(1));
+
         reportRequest = new ReportRequest();
         reportRequest.setId(UUID.randomUUID());
-        reportRequest.setProductId("product1");
-        reportRequest.setLayoutId("layout1");
-        reportRequest.setStartDate(LocalDateTime.now());
-        reportRequest.setEndDate(LocalDateTime.now().plusDays(1));
+        reportRequest.setProductId(reportRequestDto.getProductId());
+        reportRequest.setLayoutId(reportRequestDto.getLayoutId());
+        reportRequest.setStartDate(reportRequestDto.getStartDate());
+        reportRequest.setEndDate(reportRequestDto.getEndDate());
         reportRequest.setStatus(ReportStatus.PENDING);
     }
 
-    /**
-     * Tests successful report request creation.
-     * <p>
-     * Verifies that:
-     * <ul>
-     *   <li>The report request is saved to the repository</li>
-     *   <li>A Kafka message is sent with the report ID</li>
-     *   <li>The correct report ID is returned</li>
-     * </ul>
-     */
     @Test
     void createReport_ShouldSaveRequestAndSendMessage() {
+        when(reportMapper.toEntity(reportRequestDto)).thenReturn(reportRequest);
         when(requestRepository.save(any(ReportRequest.class))).thenReturn(reportRequest);
 
-        UUID result = reportService.createReport(reportRequest);
+        UUID result = reportService.createReport(reportRequestDto);
 
         assertEquals(reportRequest.getId(), result);
+        verify(reportMapper).toEntity(reportRequestDto);
         verify(requestRepository).save(reportRequest);
-        verify(kafkaProducerService).sendMessage("Создан отчет с ID: " + reportRequest.getId());
+        verify(kafkaProducerService).sendMessage("Report ID: " + reportRequest.getId());
     }
 
-    /**
-     * Tests successful report result retrieval.
-     * <p>
-     * Verifies that:
-     * <ul>
-     *   <li>The service returns the correct report result</li>
-     *   <li>The repository is queried with the correct ID</li>
-     *   <li>Optional contains the expected result</li>
-     * </ul>
-     */
     @Test
     void getReport_ShouldReturnReportResult() {
         UUID reportId = UUID.randomUUID();
@@ -133,17 +97,6 @@ public class ReportServiceTests {
         assertEquals(reportResult, result.get());
     }
 
-    /**
-     * Tests report calculation and result saving.
-     * <p>
-     * Verifies that:
-     * <ul>
-     *   <li>The report request is properly retrieved</li>
-     *   <li>Analytics data is collected for the correct period</li>
-     *   <li>The report result is saved</li>
-     *   <li>The request status is updated to COMPLETED</li>
-     * </ul>
-     */
     @Test
     void calculateAndSaveReportResult_ShouldSaveResultAndUpdateStatus() {
         when(requestRepository.findById(reportRequest.getId())).thenReturn(Optional.of(reportRequest));

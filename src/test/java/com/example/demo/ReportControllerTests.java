@@ -95,7 +95,7 @@ public class ReportControllerTests {
         request.setProductId("product1");
         request.setLayoutId("layout1");
 
-        when(reportService.createReport(any(ReportRequest.class))).thenReturn(reportId);
+        when(reportService.createReport(any(com.example.demo.dto.ReportRequestDto.class))).thenReturn(reportId);
 
         mockMvc.perform(post("/api/reports")
                         .contentType(MediaType.APPLICATION_JSON)

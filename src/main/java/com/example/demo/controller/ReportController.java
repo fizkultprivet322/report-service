@@ -1,7 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ReportIdResponse;
+import com.example.demo.dto.ReportRequestDto;
+import com.example.demo.dto.ReportResultDto;
 import com.example.demo.entity.ReportRequest;
 import com.example.demo.entity.ReportResult;
+import com.example.demo.mapper.ReportMapper;
 import com.example.demo.service.ReportService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +43,14 @@ import java.util.UUID;
 public class ReportController {
 
     private final ReportService reportService;
+    private final ReportMapper reportMapper;
 
     /**
      * Creates a new report based on the provided request.
      *
      * <p>Requires USER role authentication.
      *
-     * @param request the report creation request containing report data
+     * @param requestDto the report creation request containing report data
      * @return ResponseEntity containing the generated report ID
      *
      * @see ReportRequest
@@ -70,9 +75,9 @@ public class ReportController {
             })
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> createReport(@RequestBody ReportRequest request) {
-        UUID reportId = reportService.createReport(request);
-        return ResponseEntity.ok("Report ID: " + reportId);
+    public ResponseEntity<ReportIdResponse> createReport(@RequestBody ReportRequestDto requestDto) {
+        UUID reportId = reportService.createReport(requestDto);
+        return ResponseEntity.ok(new ReportIdResponse(reportId));
     }
 
     /**
@@ -104,12 +109,12 @@ public class ReportController {
             })
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<?> getReport(@PathVariable UUID id) {
+    public ResponseEntity<ReportResultDto> getReport(@PathVariable UUID id) {
         return reportService.getReport(id)
+                .map(reportMapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
     /**
      * Admin-only endpoint for special report operations.
      *

@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.utils.JwtUtils;
-import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
+import com.example.demo.dto.AuthRequestDto;
+import com.example.demo.dto.AuthResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -49,7 +49,7 @@ public class AuthController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Successful authentication",
-                            content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+                            content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
                     @ApiResponse(
                             responseCode = "401",
                             description = "Invalid credentials",
@@ -76,17 +76,17 @@ public class AuthController {
      *
      * @throws org.springframework.security.core.AuthenticationException if authentication fails
      *
-     * @see AuthRequest
-     * @see AuthResponse
+     * @see AuthRequestDto
+     * @see AuthResponseDto
      * @see UsernamePasswordAuthenticationToken
      */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponseDto> authenticate(@RequestBody AuthRequestDto request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
         final UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
         final String token = jwtUtils.generateToken(user);
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponseDto(token));
     }
 }

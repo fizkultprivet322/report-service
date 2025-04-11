@@ -21,7 +21,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "Authentication response containing JWT token")
-public class AuthResponse {
+public class AuthResponseDto {
     /**
      * The JWT token string generated after successful authentication.
      * <p>
@@ -46,7 +46,7 @@ public class AuthResponse {
      *
      * @param token the JWT token string to include in the response
      */
-    public AuthResponse(String token) {
+    public AuthResponseDto(String token) {
         this.token = token;
     }
 }

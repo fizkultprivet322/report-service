@@ -1,8 +1,10 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.ReportRequestDto;
 import com.example.demo.entity.ReportRequest;
 import com.example.demo.entity.ReportResult;
 import com.example.demo.entity.ReportStatus;
+import com.example.demo.mapper.ReportMapper;
 import com.example.demo.messaging.KafkaProducerService;
 import com.example.demo.repository.ReportRequestRepository;
 import com.example.demo.repository.ReportResultRepository;
@@ -40,6 +42,7 @@ public class ReportService {
     private final ReportResultRepository resultRepository;
     private final KafkaProducerService kafkaProducerService;
     private final AnalyticsService analyticsService;
+    private final ReportMapper reportMapper;
 
     /**
      * Creates a new report request and initiates processing.
@@ -47,15 +50,16 @@ public class ReportService {
      * Persists the report request and sends a message to Kafka
      * to trigger asynchronous report generation.
      *
-     * @param request the report request containing parameters
+     * @param requestDto the report request containing parameters
      * @return UUID of the created report request
      * @throws IllegalArgumentException if the request is null
      */
     @Transactional
-    public UUID createReport(ReportRequest request) {
-        requestRepository.save(request);
-        kafkaProducerService.sendMessage("Создан отчет с ID: " + request.getId());
-        return request.getId();
+    public UUID createReport(ReportRequestDto requestDto) {
+        ReportRequest reportRequest = reportMapper.toEntity(requestDto);
+        requestRepository.save(reportRequest);
+        kafkaProducerService.sendMessage("Report ID: " + reportRequest.getId());
+        return reportRequest.getId();
     }
 
     /**

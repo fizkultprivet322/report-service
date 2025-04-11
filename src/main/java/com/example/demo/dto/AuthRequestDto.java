@@ -18,7 +18,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "Authentication request")
-public class AuthRequest {
+public class AuthRequestDto {
     /**
      * The username credential for authentication.
      * <p>

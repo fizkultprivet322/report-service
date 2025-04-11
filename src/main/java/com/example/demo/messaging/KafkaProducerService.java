@@ -30,7 +30,7 @@ public class KafkaProducerService {
      * Sends a message to the report requests topic.
      * <p>
      * The message should contain all necessary information to identify
-     * and process the report request. Typically this would be a report ID
+     * and process the report request. Typically, this would be a report ID
      * or a serialized request object.
      *
      * @param message the content to be sent to Kafka topic
