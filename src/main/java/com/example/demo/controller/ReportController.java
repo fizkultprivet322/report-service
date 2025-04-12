@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.ReportIdResponse;
 import com.example.demo.dto.ReportRequestDto;
 import com.example.demo.dto.ReportResultDto;
+import com.example.demo.dto.ReportUpdateDto;
 import com.example.demo.entity.ReportRequest;
 import com.example.demo.entity.ReportResult;
 import com.example.demo.mapper.ReportMapper;
@@ -115,31 +116,30 @@ public class ReportController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    /**
-     * Admin-only endpoint for special report operations.
-     *
-     * <p>Requires ADMIN role authentication.
-     *
-     * @return ResponseEntity with admin confirmation message
-     *
-     * @see PreAuthorize
-     */
+
     @Operation(
-            summary = "Admin endpoint",
-            description = "Accessible only to users with ADMIN role",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Successful access",
-                            content = @Content(schema = @Schema(example = "This is an admin-only endpoint"))),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "Access denied",
-                            content = @Content)
-            })
-    @GetMapping("/admin/reports")
+            summary = "Update report",
+            description = "Updates a report (ADMIN only)",
+            responses = @ApiResponse(responseCode = "200", description = "Report updated")
+    )
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> adminEndpoint() {
-        return ResponseEntity.ok("This is an admin-only endpoint");
+    public ResponseEntity<?> updateReport(
+            @PathVariable UUID id,
+            @RequestBody ReportUpdateDto updateDto) {
+        reportService.updateReport(id, updateDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Delete report",
+            description = "Deletes a report (ADMIN only)",
+            responses = @ApiResponse(responseCode = "200", description = "Report deleted")
+    )
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteReport(@PathVariable UUID id) {
+        reportService.deleteReport(id);
+        return ResponseEntity.ok().build();
     }
 }

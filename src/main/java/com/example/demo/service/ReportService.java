@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.ReportRequestDto;
+import com.example.demo.dto.ReportUpdateDto;
 import com.example.demo.entity.ReportRequest;
 import com.example.demo.entity.ReportResult;
 import com.example.demo.entity.ReportStatus;
@@ -114,5 +115,31 @@ public class ReportService {
 
         reportRequest.setStatus(ReportStatus.COMPLETED);
         requestRepository.save(reportRequest);
+    }
+
+    @Transactional
+    public void updateReport(UUID reportId, ReportUpdateDto updateDto) {
+        ReportRequest reportRequest = requestRepository.findById(reportId)
+                .orElseThrow(() -> new RuntimeException("Report not found"));
+
+        if (reportRequest.getStatus() != ReportStatus.PENDING) {
+            throw new RuntimeException("Cannot update completed report");
+        }
+
+        reportRequest.setProductId(updateDto.getProductId());
+        reportRequest.setLayoutId(updateDto.getLayoutId());
+        reportRequest.setStartDate(updateDto.getStartDate());
+        reportRequest.setEndDate(updateDto.getEndDate());
+
+        requestRepository.save(reportRequest);
+    }
+
+    @Transactional
+    public void deleteReport(UUID reportId) {
+        ReportRequest reportRequest = requestRepository.findById(reportId)
+                .orElseThrow(() -> new RuntimeException("Report not found"));
+
+        requestRepository.delete(reportRequest);
+        resultRepository.deleteByRequestId(reportId);
     }
 }

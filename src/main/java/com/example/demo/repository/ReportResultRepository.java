@@ -40,4 +40,6 @@ public interface ReportResultRepository extends JpaRepository<ReportResult, UUID
      * @see Optional
      */
     Optional<ReportResult> findByRequestId(UUID requestId);
+
+    void deleteByRequestId(UUID requestId);
 }
