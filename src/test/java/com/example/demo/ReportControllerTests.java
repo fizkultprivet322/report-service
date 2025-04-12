@@ -1,8 +1,10 @@
 package com.example.demo;
 
 import com.example.demo.controller.ReportController;
+import com.example.demo.dto.ReportResultDto;
 import com.example.demo.entity.ReportRequest;
 import com.example.demo.entity.ReportResult;
+import com.example.demo.mapper.ReportMapper;
 import com.example.demo.service.ReportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +56,9 @@ public class ReportControllerTests {
     @Mock
     private ReportService reportService;
 
+    @Mock
+    private ReportMapper reportMapper;
+
     @InjectMocks
     private ReportController reportController;
 
@@ -101,7 +106,7 @@ public class ReportControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Report ID: " + reportId));
+                .andExpect(jsonPath("$.reportId").value(reportId.toString()));
     }
 
     /**
@@ -125,7 +130,13 @@ public class ReportControllerTests {
         reportResult.setConversionRatio(0.5);
         reportResult.setPaymentCount(10);
 
+        ReportResultDto reportResultDto = new ReportResultDto();
+        reportResultDto.setRequestId(reportId);
+        reportResultDto.setConversionRatio(0.5);
+        reportResultDto.setPaymentCount(10);
+
         when(reportService.getReport(reportId)).thenReturn(Optional.of(reportResult));
+        when(reportMapper.toDto(reportResult)).thenReturn(reportResultDto);
 
         mockMvc.perform(get("/api/reports/{id}", reportId))
                 .andExpect(status().isOk())
