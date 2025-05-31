@@ -1,7 +1,6 @@
 package com.example.demo;
 
 import com.example.demo.entity.ReportRequest;
-import com.example.demo.messaging.KafkaConsumerService;
 import com.example.demo.repository.ReportRequestRepository;
 import com.example.demo.service.ReportService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * Test class for {@link KafkaConsumerService}.
+ * Test class for {@link RabbitMQConsumerService}.
  * <p>
  * This class contains unit tests that verify the behavior of the Kafka consumer service
  * when processing report request messages. Tests cover both successful processing
@@ -37,7 +36,7 @@ import static org.mockito.Mockito.*;
  * @see Test
  */
 @ExtendWith(MockitoExtension.class)
-public class KafkaConsumerServiceTests {
+public class RabbitMQConsumerServiceTests {
 
     @Mock
     private ReportRequestRepository requestRepository;
@@ -46,7 +45,7 @@ public class KafkaConsumerServiceTests {
     private ReportService reportService;
 
     @InjectMocks
-    private KafkaConsumerService kafkaConsumerService;
+    private RabbitMQConsumerService rabbitMQConsumerService;
 
     private UUID reportId;
 
@@ -77,7 +76,7 @@ public class KafkaConsumerServiceTests {
 
         when(requestRepository.findById(reportId)).thenReturn(Optional.of(reportRequest));
 
-        kafkaConsumerService.consume("Создан отчет с ID: " + reportId);
+        rabbitMQConsumerService.consume("Создан отчет с ID: " + reportId);
 
         verify(reportService).calculateAndSaveReportResult(reportId);
     }
@@ -96,7 +95,7 @@ public class KafkaConsumerServiceTests {
     void consume_ShouldLogErrorWhenReportRequestNotFound() {
         when(requestRepository.findById(reportId)).thenReturn(Optional.empty());
 
-        kafkaConsumerService.consume("Создан отчет с ID: " + reportId);
+        rabbitMQConsumerService.consume("Создан отчет с ID: " + reportId);
 
         verify(reportService, never()).calculateAndSaveReportResult(any(UUID.class));
     }

@@ -1,6 +1,6 @@
 package com.example.demo;
 
-import com.example.demo.messaging.KafkaProducerService;
+import com.example.demo.messaging.RabbitMQProducerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +12,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 /**
- * Test class for {@link KafkaProducerService}.
+ * Test class for {@link RabbitMQProducerService}.
  * <p>
  * Contains unit tests that verify the behavior of the Kafka producer service
  * when sending messages to the Kafka topic. Uses Mockito to mock the KafkaTemplate
@@ -29,13 +29,13 @@ import static org.mockito.Mockito.verify;
  * @see Test
  */
 @ExtendWith(MockitoExtension.class)
-public class KafkaProducerServiceTests {
+public class RabbitMQProducerServiceTests {
 
     @Mock
     private KafkaTemplate<String, String> kafkaTemplate;
 
     @InjectMocks
-    private KafkaProducerService kafkaProducerService;
+    private RabbitMQProducerService rabbitMQProducerService;
 
     /**
      * Tests that the service correctly sends messages to Kafka.
@@ -51,7 +51,7 @@ public class KafkaProducerServiceTests {
     void sendMessage_ShouldSendMessageToKafka() {
         String message = "Test message";
 
-        kafkaProducerService.sendMessage(message);
+        rabbitMQProducerService.sendMessage(message);
 
         verify(kafkaTemplate).send(eq("report_requests"), eq(message));
     }

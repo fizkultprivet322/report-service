@@ -6,7 +6,7 @@ import com.example.demo.entity.ReportRequest;
 import com.example.demo.entity.ReportResult;
 import com.example.demo.entity.ReportStatus;
 import com.example.demo.mapper.ReportMapper;
-import com.example.demo.messaging.KafkaProducerService;
+import com.example.demo.messaging.RabbitMQProducerService;
 import com.example.demo.repository.ReportRequestRepository;
 import com.example.demo.repository.ReportResultRepository;
 import jakarta.transaction.Transactional;
@@ -41,7 +41,7 @@ import java.util.UUID;
 public class ReportService {
     private final ReportRequestRepository requestRepository;
     private final ReportResultRepository resultRepository;
-    private final KafkaProducerService kafkaProducerService;
+    private final RabbitMQProducerService rabbitMQProducerService;
     private final AnalyticsService analyticsService;
     private final ReportMapper reportMapper;
 
@@ -59,8 +59,7 @@ public class ReportService {
     public UUID createReport(ReportRequestDto requestDto) {
         ReportRequest reportRequest = reportMapper.toEntity(requestDto);
         requestRepository.save(reportRequest);
-        kafkaProducerService.sendMessage("Report ID: " + reportRequest.getId());
-        return reportRequest.getId();
+        return calculateAndSaveReportResult(reportRequest.getId());
     }
 
     /**
@@ -92,7 +91,7 @@ public class ReportService {
      * @throws RuntimeException if the report request is not found
      */
     @Transactional
-    public void calculateAndSaveReportResult(UUID reportId) {
+    public UUID calculateAndSaveReportResult(UUID reportId) {
         ReportRequest reportRequest = requestRepository.findById(reportId)
                 .orElseThrow(() -> new RuntimeException("Report request not found"));
 
@@ -115,6 +114,8 @@ public class ReportService {
 
         reportRequest.setStatus(ReportStatus.COMPLETED);
         requestRepository.save(reportRequest);
+        rabbitMQProducerService.sendReportCompletedNotification(reportId);
+        return reportId;
     }
 
     @Transactional

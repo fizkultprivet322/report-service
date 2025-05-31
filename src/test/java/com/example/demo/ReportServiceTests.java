@@ -5,7 +5,7 @@ import com.example.demo.entity.ReportRequest;
 import com.example.demo.entity.ReportResult;
 import com.example.demo.entity.ReportStatus;
 import com.example.demo.mapper.ReportMapper;
-import com.example.demo.messaging.KafkaProducerService;
+import com.example.demo.messaging.RabbitMQProducerService;
 import com.example.demo.repository.ReportRequestRepository;
 import com.example.demo.repository.ReportResultRepository;
 import com.example.demo.service.AnalyticsService;
@@ -37,7 +37,7 @@ public class ReportServiceTests {
     private ReportResultRepository resultRepository;
 
     @Mock
-    private KafkaProducerService kafkaProducerService;
+    private RabbitMQProducerService rabbitMQProducerService;
 
     @Mock
     private AnalyticsService analyticsService;
@@ -78,7 +78,7 @@ public class ReportServiceTests {
         assertEquals(reportRequest.getId(), result);
         verify(reportMapper).toEntity(reportRequestDto);
         verify(requestRepository).save(reportRequest);
-        verify(kafkaProducerService).sendMessage("Report ID: " + reportRequest.getId());
+        verify(rabbitMQProducerService).sendMessage("Report ID: " + reportRequest.getId());
     }
 
     @Test
